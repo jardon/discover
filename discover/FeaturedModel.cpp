@@ -25,37 +25,24 @@ using namespace Qt::StringLiterals;
 
 Q_GLOBAL_STATIC(QString, featuredCache)
 
-static QString featuredFileName()
+static QString featuredURL()
 {
-    // kwriteconfig5 --file discoverrc --group Software --key FeaturedListingFileName featured-5.9.json
+    // kwriteconfig5 --file discoverrc --group Software --key FeaturedListingURL https://autoconfig.kde.org/discover/featured-5.9.json
     KConfigGroup grp(KSharedConfig::openConfig(), u"Software"_s);
-    if (grp.hasKey("FeaturedListingFileName")) {
-        return grp.readEntry("FeaturedListingFileName", QString());
+    if (grp.hasKey("FeaturedListingURL")) {
+        return grp.readEntry("FeaturedListingURL", QString());
     }
-    static const bool isMobile = QByteArrayList{"1", "true"}.contains(qgetenv("QT_QUICK_CONTROLS_MOBILE"));
-    return isMobile ? QLatin1String("featured-mobile-5.9.json") : QLatin1String("featured-5.9.json");
+    return QStringLiteral("https://autoconfig.kde.org/discover/featured-5.9.json");
 }
-
-static QString featuredBaseURL()
-{
-    // kwriteconfig5 --file discoverrc --group Software --key FeaturedListingBaseURL https://autoconfig.kde.org/discover/
-    KConfigGroup grp(KSharedConfig::openConfig(), u"Software"_s);
-    if (grp.hasKey("FeaturedListingBaseURL")) {
-        return grp.readEntry("FeaturedListingBaseURL", QString());
-    }
-    return QLatin1String("https://autoconfig.kde.org/discover/");
-}
-
 
 FeaturedModel::FeaturedModel()
 {
     const QString dir = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
     QDir().mkpath(dir);
 
-    static const QString fileName = featuredFileName();
-    static const QString baseURL = featuredBaseURL();
-    *featuredCache = dir + QLatin1Char('/') + fileName;
-    const QUrl featuredUrl(baseURL + fileName);
+    static const QString url = featuredURL();
+    *featuredCache = dir + QLatin1Char('/featured.json');
+    const QUrl featuredUrl(url);
     const bool shouldBlock = !QFileInfo::exists(*featuredCache);
     auto *fetchJob = KIO::storedGet(featuredUrl, KIO::NoReload, KIO::HideProgressInfo);
     if (shouldBlock) {
