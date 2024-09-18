@@ -36,12 +36,12 @@ static QString featuredFileName()
     return isMobile ? QLatin1String("featured-mobile-5.9.json") : QLatin1String("featured-5.9.json");
 }
 
-static QString featuredFileURLBase()
+static QString featuredBaseURL()
 {
-    // kwriteconfig5 --file discoverrc --group Software --key FeaturedListingURLBase https://autoconfig.kde.org/discover/
+    // kwriteconfig5 --file discoverrc --group Software --key FeaturedListingBaseURL https://autoconfig.kde.org/discover/
     KConfigGroup grp(KSharedConfig::openConfig(), u"Software"_s);
-    if (grp.hasKey("FeaturedListingURLBase")) {
-        return grp.readEntry("FeaturedListingURLBase", QString());
+    if (grp.hasKey("FeaturedListingBaseURL")) {
+        return grp.readEntry("FeaturedListingBaseURL", QString());
     }
     return QLatin1String("https://autoconfig.kde.org/discover/");
 }
@@ -53,9 +53,9 @@ FeaturedModel::FeaturedModel()
     QDir().mkpath(dir);
 
     static const QString fileName = featuredFileName();
-    static const QString urlBase = featuredFileURLBase();
+    static const QString baseURL = featuredBaseURL();
     *featuredCache = dir + QLatin1Char('/') + fileName;
-    const QUrl featuredUrl(urlBase + fileName);
+    const QUrl featuredUrl(baseURL + fileName);
     const bool shouldBlock = !QFileInfo::exists(*featuredCache);
     auto *fetchJob = KIO::storedGet(featuredUrl, KIO::NoReload, KIO::HideProgressInfo);
     if (shouldBlock) {
