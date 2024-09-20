@@ -27,12 +27,17 @@ Q_GLOBAL_STATIC(QString, featuredCache)
 
 static QString featuredURL()
 {
-    // kwriteconfig5 --file discoverrc --group Software --key FeaturedListingURL https://autoconfig.kde.org/discover/featured-5.9.json
-    KConfigGroup grp(KSharedConfig::openConfig(), u"Software"_s);
+    QString config = QStringLiteral("/usr/share/discover/featuredurlrc");
+    KConfigGroup grp(KSharedConfig::openConfig(config), u"Software"_s);
     if (grp.hasKey("FeaturedListingURL")) {
         return grp.readEntry("FeaturedListingURL", QString());
     }
-    return QStringLiteral("https://autoconfig.kde.org/discover/featured-5.9.json");
+    QString baseURL = QStringLiteral("https://autoconfig.kde.org/discover/");
+
+    static const bool isMobile = QByteArrayList{"1", "true"}.contains(qgetenv("QT_QUICK_CONTROLS_MOBILE"));
+    QString fileName = isMobile ? QLatin1String("featured-mobile-5.9.json") : QLatin1String("featured-5.9.json");
+
+    return baseURL + fileName;
 }
 
 FeaturedModel::FeaturedModel()
