@@ -45,8 +45,10 @@ FeaturedModel::FeaturedModel()
     const QString dir = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
     QDir().mkpath(dir);
 
-    static const QString url = featuredURL();
-    *featuredCache = dir + QLatin1Char('/featured.json');
+    static QString url = featuredURL();
+    QStringList splitUrl = url.split(u'/');
+    QString fileName = splitUrl.value(splitUrl.length() - 1);
+    *featuredCache = dir + fileName;
     const QUrl featuredUrl(url);
     const bool shouldBlock = !QFileInfo::exists(*featuredCache);
     auto *fetchJob = KIO::storedGet(featuredUrl, KIO::NoReload, KIO::HideProgressInfo);
